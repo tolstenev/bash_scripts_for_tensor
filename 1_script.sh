@@ -1,11 +1,11 @@
 #!/bin/sh
 
-rm *.tmp
-rm first.txt third.txt
-
+FILENAME="result_of_dns_resolving"
 IP_REGEX_IPV4="(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"
 
-#clear
+touch first.txt \
+      second.txt \
+      third.txt
 
 if [[ -n $1 ]]; then
   for item in $(cat $1); do
@@ -30,7 +30,34 @@ if [[ -n $1 ]]; then
     if [[ $? -eq 0 ]]; then
       name=$(head -n$str_num names.tmp | tail -n1)
       echo $name', '$ipaddr >> third.txt
+    else
+      name=$(head -n$str_num names.tmp | tail -n1)
+      echo $name', '$ipaddr >> second.txt
     fi
 
   done
+
+  current_date=$(date "+%d_%m_%y_%H_%M_%S")
+  FILENAME=$FILENAME'_'$current_date'.txt'
+
+  echo "## 1, doesn't resolved DNS ##" >> $FILENAME
+  cat first.txt >> $FILENAME
+  echo "## 2, resolved DNS but doesn't ping  ##" >> $FILENAME
+  cat second.txt >> $FILENAME
+  echo "## 3, resolved DNS and ping it ##" >> $FILENAME
+  cat third.txt >> $FILENAME
+
+  rm host.tmp \
+     not_resolved.tmp \
+     ip_with_not_found.tmp \
+     clean.tmp \
+     names.tmp \
+     ip.tmp \
+     ping.tmp \
+     ping_good.tmp
+  rm first.txt \
+     second.txt \
+     third.txt
+
+  cat $FILENAME
 fi
